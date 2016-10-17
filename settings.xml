@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<settings xmlns = "http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation = "http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <localRepository>D:\OpenSource\Maven\repository</localRepository>
+
+    <!--使用OSC镜像配置-->
+    <!--<mirrors>
+        <mirror>
+            <id>nexus-osc</id>
+            <mirrorOf>central</mirrorOf>
+            <username>Nexus osc</username>
+            <url>http://maven.oschina.net/content/groups/public/</url>
+            &lt;!&ndash;<url>http://localhost:8081/nexus/content/groups/public/</url>&ndash;&gt;
+
+        </mirror>
+        <mirror>
+        <id>osc_thirdparty</id>
+        <mirrorOf>thirdparty</mirrorOf>
+        <url>http://maven.oschina.net/content/repositories/thirdparty/</url>
+        </mirror>
+    </mirrors>-->
+    <!--<profiles>-->
+    <!--<profile>-->
+    <!--<id>osc</id>-->
+    <!--<activation>-->
+    <!--<activeByDefault>true</activeByDefault>-->
+    <!--<jdk>1.8</jdk>-->
+    <!--</activation>-->
+    <!--<repositories>-->
+    <!--<repository>-->
+    <!--<id>osc</id>-->
+    <!--<url>http://maven.oschina.net/content/groups/public/</url>-->
+    <!--&lt;!&ndash;<url>http://localhost:8081/nexus/content/groups/public/</url>&ndash;&gt;-->
+    <!--<releases>-->
+    <!--<enabled>true</enabled>-->
+    <!--<updatePolicy>daily</updatePolicy>-->
+    <!--<checksumPolicy>fail</checksumPolicy>-->
+    <!--</releases>-->
+    <!--<snapshots>-->
+    <!--<enabled>false</enabled>-->
+    <!--<updatePolicy>daily</updatePolicy>-->
+    <!--<checksumPolicy>fail</checksumPolicy>-->
+    <!--</snapshots>-->
+    <!--</repository>-->
+    <!--<repository>-->
+    <!--<id>osc_thirdparty</id>-->
+    <!--<url>http://maven.oschina.net/content/repositories/thirdparty/</url>-->
+    <!--&lt;!&ndash;<url>http://localhost:8081/nexus/content/groups/public/</url>&ndash;&gt;-->
+    <!--</repository>-->
+    <!--</repositories>-->
+    <!--<pluginRepositories>-->
+    <!--<pluginRepository>-->
+    <!--<id>osc</id>-->
+    <!--&lt;!&ndash;<url>http://localhost:8081/nexus/content/groups/public/</url>&ndash;&gt;-->
+    <!--<url>http://maven.oschina.net/content/groups/public/</url>-->
+    <!--</pluginRepository>-->
+    <!--</pluginRepositories>-->
+    <!--</profile>-->
+    <!--</profiles>-->
+
+    <!--<activeProfiles>-->
+    <!--<activeProfile>osc</activeProfile>-->
+    <!--</activeProfiles>-->
+</settings>

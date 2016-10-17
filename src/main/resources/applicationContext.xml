@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xmlns = "http://www.springframework.org/schema/beans"
+        xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context = "http://www.springframework.org/schema/context"
+        xmlns:aop = "http://www.springframework.org/schema/aop"
+        xmlns:tx = "http://www.springframework.org/schema/tx"
+        xsi:schemaLocation = "
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/aop
+			http://www.springframework.org/schema/aop/spring-aop.xsd
+			http://www.springframework.org/schema/tx
+			http://www.springframework.org/schema/tx/spring-tx.xsd
+            ">
+    <!-- 开启Spring注解功能 -->
+    <context:annotation-config />
+    <!-- 配置Spring注解扫描 -->
+    <context:component-scan base-package = "
+							at.flying.service,
+							at.flying.websocket
+							">
+    </context:component-scan>
+
+    <!-- 开启AspectJ 注解自动代理机制-->
+    <aop:aspectj-autoproxy />
+    <!-- 开启事务注解 -->
+    <tx:annotation-driven />
+
+    <!--引入外部属性文件-->
+    <context:property-placeholder location = "classpath:db.properties" />
+
+    <!--配置C3P0连接池(数据源)-->
+    <bean id = "comboPooledDataSource" class = "com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name = "driverClass" value = "${mysql.driver}" />
+        <property name = "jdbcUrl" value = "${mysql.url}" />
+        <property name = "user" value = "${mysql.username}" />
+        <property name = "password" value = "${mysql.password}" />
+    </bean>
+
+    <!--配置SqlSessionFactory工厂-->
+    <bean id = "sqlSessionFactory" class = "org.mybatis.spring.SqlSessionFactoryBean">
+        <property name = "dataSource" ref = "comboPooledDataSource" />
+        <property name = "configLocation" value = "classpath:mybatis.xml" />
+        <!--匹配Mapper文件-->
+        <property name = "mapperLocations" value = "classpath:at/flying/mapper/xml/*.xml" />
+    </bean>
+
+    <!--Mapper接口扫描器-->
+    <bean class = "org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name = "basePackage" value = "at.flying.interfaces" />
+        <property name = "sqlSessionFactoryBeanName" value = "sqlSessionFactory" />
+    </bean>
+
+    <!--配置事务管理器-->
+    <bean id = "transactionManager"
+          class = "org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name = "dataSource" ref = "comboPooledDataSource" />
+    </bean>
+
+
+    <!--*************************************引入外部Spring的配置文件*************************************-->
+    <!--引入WebSocket配置-->
+    <import resource = "at/flying/websocket/spring/xml/websocket-spring.xml" />
+</beans>

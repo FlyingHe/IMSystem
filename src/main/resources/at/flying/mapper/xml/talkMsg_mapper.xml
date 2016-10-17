@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "at.flying.interfaces.TalkMsgMapper">
+    <resultMap id = "talkMsg" type = "TalkMsg" autoMapping = "true">
+        <id column = "id" property = "id" />
+        <result column = "t_from" property = "from" />
+        <result column = "t_to" property = "to" />
+        <result column = "t_date" property = "date" />
+    </resultMap>
+
+    <insert id = "add">
+        INSERT INTO talk_msg VALUES (#{id}, #{from}, #{to}, #{content}, #{date})
+    </insert>
+
+    <select id = "findById" resultMap = "talkMsg">
+        SELECT *
+        FROM talk_msg
+        WHERE id = #{id}
+    </select>
+
+    <select id = "findByFromAndTo" resultMap = "talkMsg">
+        SELECT *
+        FROM talk_msg
+        WHERE (t_from = #{from} OR t_from = #{to}) AND (t_to = #{to} OR t_to = #{from})
+        ORDER BY t_date ASC
+    </select>
+</mapper>

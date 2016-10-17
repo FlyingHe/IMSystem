@@ -1,0 +1,520 @@
+<!---
+  Created by FlyingHe on 2016/8/14.
+--->
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8">
+    <title>使用WebSocket做的一个简单的IM系统</title>
+    <link rel = "stylesheet" type = "text/css" href = "easyui/themes/default/easyui.css">
+    <link rel = "stylesheet" type = "text/css" href = "easyui/themes/icon.css">
+
+    <script type = "text/javascript" src = "js/jquery-2.1.4.min.js"></script>
+    <script src = "easyui/jquery.easyui.min.js"></script>
+    <script src = "easyui/easyui-lang-zh_CN.js"></script>
+    <script src = "easyui/jquery.edatagrid.js"></script>
+    <!--富文本编辑器的Script文件-->
+    <!-- 样式文件 -->
+    <link rel = "stylesheet" href = "./umeditor/themes/default/css/umeditor.css">
+    <!-- 配置文件 -->
+    <script type = "text/javascript" src = "./umeditor/umeditor.config.js"></script>
+    <!-- 编辑器源码文件 -->
+    <script type = "text/javascript" src = "./umeditor/umeditor.js"></script>
+    <!-- 语言包文件 -->
+    <script type = "text/javascript" src = "./umeditor/lang/zh-cn/zh-cn.js"></script>
+</head>
+<style>
+    #memo_id p {
+        padding-left: 10px;
+    }
+
+    #numOfTalkerOnline {
+        text-align: center;
+    }
+
+    #talkersOfOnline ul li {
+        text-decoration: none;
+        display: block;
+        font-size: 24px;
+        text-align: left;
+        vertical-align: text-top;
+        height: 30px;
+        margin-bottom: 10px;
+    }
+
+    #talkersOfOnline ul li:hover {
+        background-color: grey;
+        cursor: pointer;
+    }
+
+    /*图灵链接的样式*/
+    .turing_link {
+        color: blue;
+        text-decoration: none;
+    }
+
+    .turing_link:hover {
+        color: #95B8E7;
+    }
+
+    /************************聊天选项卡样式表 start************************/
+    ul {
+        list-style: none;
+    }
+
+    .qipao {
+        position: relative;
+        clear: both;
+        /*margin-bottom: 20px;*/
+    }
+
+    .headimg img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50px;
+        vertical-align: top;
+    }
+
+    .head_img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50px;
+        vertical-align: middle;
+    }
+
+    .headimg {
+        display: inline-block;
+    }
+
+    .leftqipao {
+        display: inline-block;
+        vertical-align: top;
+        position: relative;
+        top: 30px;
+    }
+
+    .rightqipao {
+        display: block;
+        vertical-align: top;
+        position: relative;
+        top: 30px;
+    }
+
+    .left_con {
+        background-color: orange;
+        padding: 15px;
+        display: inline-block;
+        border-radius: 10px;
+        max-width: 300px;
+        float: left;
+        line-height: 20px;
+        margin-bottom: 10px;
+    }
+
+    .left_sj {
+        margin: 0;
+        width: 0;
+        height: 0;
+        border-left: 10px solid rgba(255, 255, 255, 0);
+        border-bottom: 10px solid rgba(255, 255, 255, 0);
+        border-right: 10px solid orange;
+        border-top: 10px solid rgba(255, 255, 255, 0);
+        float: left;
+        position: relative;
+        top: 10px;
+    }
+
+    .right_con {
+        background-color: orange;
+        padding: 15px;
+        display: inline-block;
+        border-radius: 10px;
+        max-width: 300px;
+        float: right;
+        line-height: 20px;
+        margin-bottom: 10px;
+    }
+
+    .right_sj {
+        margin: 0;
+        width: 0;
+        height: 0;
+        border-left: 10px solid orange;
+        border-bottom: 10px solid rgba(255, 255, 255, 0);
+        border-right: 10px solid rgba(255, 255, 255, 0);
+        border-top: 10px solid rgba(255, 255, 255, 0);
+        float: right;
+        position: relative;
+        top: 10px;
+    }
+
+    .fl {
+        float: left;
+    }
+
+    .fr {
+        float: right;
+    }
+
+    .leftqipao .show_time {
+        float: left;
+    }
+
+    .rightqipao .show_time {
+        float: right;
+    }
+
+    /************************聊天选项卡样式表 end************************/
+</style>
+<script>
+    /*全局Websocket*/
+    var ws_websocket = null;
+    /*使div滚动条滚到最低端*/
+    function scrollToBottom() {
+        $(".msg_container").each(function () {
+            $(this).scrollTop(this.scrollHeight);
+        });
+
+    }
+    /*成功接受到信息或者信息发送成功时会创建信息条*/
+    function createMsg(msg) {
+        var isMine = msg.from == JSON.parse($("#talkerid").val()).id ? true : false;
+        var div_headimg_fr_fl = "<div class = \"headimg " + (isMine ? "fr" : "fl") + "\"><img src = \"http://localhost:8080/imSystem" + JSON.parse($("#talkerid").val()).headImg + "\" /></div>";
+        var div_left_right_sj = "<div class = \"" + (isMine ? "right" : "left") + "_sj\"></div>";
+        var div_left_right_con = "<div class = \"" + (isMine ? "right" : "left") + "_con\"><span class = \"show_time\">" + msg.date + "</span><br/><hr/>" + msg.content + "</div>";
+        var div_left_right_qipao = "<div class = \"" + (isMine ? "right" : "left") + "qipao\">" + div_left_right_sj + div_left_right_con + "</div>";
+        var li = "<li class = \"qipao\">" + div_headimg_fr_fl + div_left_right_qipao + "</li>";
+        $("#talker" + (isMine ? msg.to : msg.from)).append(li);
+        scrollToBottom();
+
+    }
+    /*接收别人发来的消息*/
+    function acceptMsg(data) {
+        var msg = data.msg;
+        createMsg(msg);
+    }
+    /*自己成功发送给别人消息时调用的函数*/
+    function sendMsgSuccess(data) {
+        createMsg(data.msg);
+        //清空消息框
+        UM.getEditor("talker_msg" + data.msg.to).ready(function () {
+            this.setContent("", false);
+        })
+    }
+    /*自己给别人发送消息*/
+    function sendMsg() {
+        var from = JSON.parse($("#talkerid").val()).id;
+        var to = $("#tabs_id").tabs("getSelected").panel("options").id;
+        var content = "";
+        var txt = "";
+        UM.getEditor("talker_msg" + to).ready(function () {
+            content = to == 1 ? this.getContentTxt() : this.getContent();
+            txt = this.getPlainTxt();
+        });
+        /*判断内容是否为空*/
+        if (txt.trim() == "") {
+            $.messager.show({
+                title: '提醒',
+                msg: '大哥，您啥内容都不发么，黄段子也OK啊',
+                timeout: 2000,
+                showType: 'slide'
+            });
+            return;
+        }
+
+        /*封装信息*/
+        var message = {
+            "type": to == 1 ? "sendMessageToRobot" : "sendMessage",
+            "msg": {
+                "from": from,
+                "to": to,
+                "content": content
+            }
+        };
+        console.log("Msg:" + JSON.stringify(message));
+        /*向服务器发送信息*/
+        ws_websocket.send(JSON.stringify(message));
+
+    }
+    /*创建通信选项卡*/
+    function createTalkTab(from_id, to_id, to_name) {
+        /*双击自己头像将不会创建*/
+        if (from_id == to_id) {
+            $.messager.show({
+                title: '提醒',
+                msg: '大哥，您自言自语还需要网络么',
+                timeout: 2000,
+                showType: 'slide'
+            });
+            return;
+        }
+        /*如果该选项卡存在的话就切换到该选项卡，若不存在就创建选项卡*/
+        if ($("#tabs_id").tabs("exists", to_name)) {
+            $("#tabs_id").tabs("select", to_name);
+            scrollToBottom();
+        } else {
+            $("#tabs_id").tabs("add", {
+                id: to_id,
+                title: to_name,
+                selected: true,
+                closable: true,
+                href: "http://localhost:8080/imSystem/talkMsg/findByFromAndTo?from=" + from_id + "&to=" + to_id
+            })
+        }
+    }
+    /*向服务器获取在线列表并更新浏览器在线列表*/
+    function updateTalkerOnline(id) {
+        $.ajax({
+            type: "post",
+            url: "http://localhost:8080/imSystem/talker/findTalkersOfLogin",
+            data: {"id": id},
+            dataType: "json",
+            success: function (data) {
+                var total = data.total;
+                /*设置当前在线用户数量*/
+                $("#numOfTalkerOnline").text("当前在线人数:" + total);
+                console.log(data);
+                if (total != 0) {
+                    /*清空当前在线列表*/
+                    $("#talkersOfOnline ul").empty();
+                    /*重新创建在线列表*/
+                    for (var i = 0; i < total; i++) {
+                        var username = data.talkers[i].username;
+                        console.log("headImg:" + data.talkers[i].headImg);
+                        var event = "ondblclick=\"createTalkTab(" + id + "," + data.talkers[i].id + ",'" + username + "')\"";
+                        var img = "<img src='http://localhost:8080/imSystem" + data.talkers[i].headImg + "' class='head_img'/>";
+                        var li = "<li " + event + ">" + img + username + "</li><br/>";
+                        console.log(li);
+                        $("#talkersOfOnline ul").append(li);
+                    }
+                }
+            }
+        })
+    }
+    /*创建会话*/
+    function createWebSocket(talker) {
+        /*请求WebSocket的地址*/
+        var url = "ws://localhost:8080/imSystem/easyui/talk?id=" + talker.id;
+        /*开始建立连接*/
+        var websocket = new WebSocket(url);
+        console.log(talker.id);
+        /*WebSocket建立成功执行的函数*/
+        websocket.onopen = function (event) {
+            /*关闭登录对话框*/
+            $("#dlg_login").dialog("close");
+            /*禁用上线按钮*/
+            $("#memo_id h1 a:first").linkbutton("disable");
+            /*启用上线按钮*/
+            $("#memo_id h1 a:last").linkbutton("enable");
+            console.log("IMG:" + talker.headImg);
+            /*通过一个Hidden标签的值（以Json字符串格式）存储当前登录用户的信息*/
+            $("#talkerid").val(JSON.stringify(talker));
+            console.log("JsonImg:" + JSON.parse($("#talkerid").val()).headImg);
+            console.log("userid" + $("#talkerid").val());
+            /*用一个全局变量指向当前创建的WebSocket对象以供其他函数使用该WebSocket对象*/
+            ws_websocket = websocket;
+            /*用户上线提醒*/
+            $.messager.show({
+                title: '上线提醒',
+                msg: '您已上线',
+                timeout: 2000,
+                showType: 'slide'
+            });
+        };
+        /*服务端向客户端发送信息时执行的函数*/
+        websocket.onmessage = function (event) {
+            console.log("EVEN:" + event.data);
+            /*将服务器传递过来的Json字符串转化为JS的json对象*/
+            var data = JSON.parse(event.data);
+            /*根据该信息的类型执行不同的操作*/
+            if (data.type.toLowerCase() == "updateTalkersOnline".toLowerCase()) {
+                if (data.updateTalkersOnline) {
+                    /*发送更新在线列表的请求*/
+                    updateTalkerOnline(JSON.parse($("#talkerid").val()).id);
+                }
+            } else if (data.type.toLowerCase() == "sendMessage".toLowerCase()) {
+                /*这个在客户端表示别人向自己发送信息*/
+                acceptMsg(data);
+            } else if (data.type.toLowerCase() == "sendMessageSuccessful".toLowerCase()) {
+                /*这个在客户端表示自己向别人发送信息成功*/
+                sendMsgSuccess(data);
+            }
+        };
+        /*与服务器端连接关闭时执行的函数*/
+        websocket.onclose = function (event) {
+            /*下线后启用上线按钮*/
+            $("#memo_id h1 a:first").linkbutton("enable");
+            /*下线后禁用下线按钮*/
+            $("#memo_id h1 a:last").linkbutton("disable");
+            /*清空在线列表*/
+            $("#talkersOfOnline ul").empty();
+            /*清空在线用户数量内容*/
+            $("#numOfTalkerOnline").text("");
+            /*重置显示当前在线用户位置内容*/
+            $("#currentTalkerName").text("当前可登陆用户：鲜橙多，蠢比，傻逼，笔记本，好丽友派（无密码）");
+            /*下线后关闭聊天选项卡*/
+            var tabs = $("#tabs_id").tabs("tabs");
+
+            var length = tabs.length;
+            for (var i = 0; i < length; i++) {
+                console.log(tabs);
+                $("#tabs_id").tabs("close", $("#tabs_id").tabs("getTabIndex", tabs[0]));
+            }
+            /*用户下线成功提醒*/
+            $.messager.show({
+                title: '下线提醒',
+                msg: '您已下线',
+                timeout: 2000,
+                showType: 'slide'
+            });
+        }
+    }
+
+    /*给选项卡添加属性和事件*/
+    $(function () {
+
+        $("#tabs_id").tabs({
+            border: false,
+            onLoad: function (panel) {
+                var d = panel.panel("options");
+                if (d.id != null) {
+                    /*加载成功后初始化富文本编辑器*/
+                    var um = UM.getEditor("talker_msg" + d.id);
+                    /*
+                     只有当通信对象是智能机器人的时候，才为百度富文本编辑器添加键盘事件，
+                     按Enter键即可发送信息
+                     */
+                    if (d.id == 1) {
+                        $(um.body).keypress(function (event) {
+                            /*keyCode是13的话表示按下的是Enter键*/
+                            if (event.keyCode == 13) {
+                                /*发送信息*/
+                                sendMsg();
+                            }
+                        });
+                    }
+                    scrollToBottom();
+                }
+            },
+            onBeforeClose: function (title, index) {
+                var d = $("#tabs_id").tabs("getTab", index).panel("options");
+                /*关闭选项卡之前要先销毁富文本编辑器对象，
+                 否则再次打开该选项卡时初始化富文本编辑器会出问题
+                 */
+                UM.getEditor("talker_msg" + d.id).destroy();
+            }
+        });
+    });
+
+
+    $(function () {
+        /*初始化登录谈话框*/
+        $("#dlg_login").dialog({
+            title: "登录",
+            closed: true,
+            modal: true,
+            width: 300,
+            height: 170,
+            buttons: [{
+                //iconCls: "icon-search",
+                text: "登录",
+                handler: function () {
+                    var name = $("#talker_name").val();
+                    //var password = $("#talker_pwd").val();
+                    $.ajax({
+                        type: "post",
+                        url: "http://localhost:8080/imSystem/talker/findByName",
+                        data: {"name": name},
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.status == 0) {
+                                /*登录失败*/
+                                $.messager.alert("提示", "登录失败，请重新登录", 'info');
+                            } else if (data.status == -1) {
+                                /*该用户已经登录，不能重复登录*/
+                                $.messager.alert("提示", "该用户已登录，您不能重复登录", 'info');
+                            } else {
+                                /*登录成功*/
+                                /*显示当前登录用户*/
+                                $("#currentTalkerName").text("当前登录用户:" + data.talker.username);
+                                //创建会话，与服务器建立WebSocket长连接
+                                createWebSocket(data.talker);
+                            }
+                        },
+                        error: function () {
+                            $.messager.alert("错误", "登录失败，请重新登录", 'error');
+                        }
+                    });
+                }
+            }, {
+                iconCls: "icon-cancel",
+                text: "取消",
+                handler: function () {
+                    $("#dlg_login").dialog("close");
+                }
+            }]
+        });
+
+        /*为上线按钮添加事件*/
+        $("#memo_id h1 a:first").linkbutton({
+            onClick: function () {
+                $("#login_form").form("clear");
+                $("#dlg_login").dialog("open")
+            }
+        });
+        /*为下线按钮添加事件*/
+        $("#memo_id h1 a:last").linkbutton({
+            onClick: function () {
+                /*向服务器发送下线信息表示自己要下线了*/
+                ws_websocket.send(JSON.stringify({
+                    "type": "logoffTalker",
+                    "logoffUser": true,
+                    "id": JSON.parse($("#talkerid").val()).id
+                }));
+            }
+        });
+    })
+</script>
+<body class = "easyui-layout">
+    <!--此hidden存储当前登录用户的信息，以Json字符串的形式存储用户信息-->
+    <input type = "hidden" id = "talkerid" />
+    <!--登录框容器-->
+    <div id = "dlg_login" style = "text-align: center">
+        <form id = "login_form">
+            <div>
+                <p><input id = "talker_name" class = "easyui-textbox" data-options = "required:true,prompt:'输入您的姓名'" />
+                </p>
+                <p><input id = "talker_pwd" class = "easyui-passwordbox"
+                          data-options = "required:false,prompt:'输入您的密码'" /></p>
+            </div>
+        </form>
+    </div>
+    <!--<div data-options = "region:'north',split:false,border:false" style = "height:5%;text-align: center;">-->
+    <!--<center>使用WebSocket做的一个简单的IM系统</center>-->
+    <!--</div>-->
+    <div data-options = "region:'south',split:false,border:true" style = "height:5%;text-align: center">&copy;Flying版权所有
+    </div>
+    <div id = "memo_id" data-options = "region:'east',title:'备注',split:false,collapsible:false,border:false"
+         style = "width:20%">
+        <h1 style = "text-align: center">
+            <a class = "easyui-linkbutton" data-options = "disabled:false">上线</a>
+            <a class = "easyui-linkbutton" data-options = "disabled:true">下线</a>
+        </h1>
+        <hr />
+        <!--显示当前用户名字-->
+        <p id = "currentTalkerName" style = "text-align: center;">
+            当前可登陆用户：鲜橙多，蠢比，傻逼，笔记本，好丽友派（无密码）
+        </p>
+        <hr />
+        <!--显示当前在线用户数量-->
+        <h1 id = "numOfTalkerOnline"></h1>
+        <!--在线用户列表-->
+        <div id = "talkersOfOnline">
+            <ul></ul>
+        </div>
+    </div>
+    <div id = "tabs_id" class = "easyui-tabs" data-options = "region:'center',border:false"
+         style = "padding:5px;background:#eee;">
+    </div>
+</body>
+</html>
