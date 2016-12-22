@@ -5,11 +5,9 @@ import at.flying.service.TalkerService;
 import at.flying.websocket.TalkWebSoketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import java.util.Map;
 @Controller
 @RequestMapping("talker")
 public class TalkerAction {
-
     @Autowired
     private TalkerService talkerService;
 

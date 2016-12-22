@@ -179,7 +179,7 @@
     /*成功接受到信息或者信息发送成功时会创建信息条*/
     function createMsg(msg) {
         var isMine = msg.from == JSON.parse($("#talkerid").val()).id ? true : false;
-        var div_headimg_fr_fl = "<div class = \"headimg " + (isMine ? "fr" : "fl") + "\"><img src = \"http://localhost:8080/imSystem" + JSON.parse($("#talkerid").val()).headImg + "\" /></div>";
+        var div_headimg_fr_fl = "<div class = \"headimg " + (isMine ? "fr" : "fl") + "\"><img src = \"/IMSystem" + JSON.parse($("#talkerid").val()).headImg + "\" /></div>";
         var div_left_right_sj = "<div class = \"" + (isMine ? "right" : "left") + "_sj\"></div>";
         var div_left_right_con = "<div class = \"" + (isMine ? "right" : "left") + "_con\"><span class = \"show_time\">" + msg.date + "</span><br/><hr/>" + msg.content + "</div>";
         var div_left_right_qipao = "<div class = \"" + (isMine ? "right" : "left") + "qipao\">" + div_left_right_sj + div_left_right_con + "</div>";
@@ -258,7 +258,7 @@
                 title: to_name,
                 selected: true,
                 closable: true,
-                href: "http://localhost:8080/imSystem/talkMsg/findByFromAndTo?from=" + from_id + "&to=" + to_id
+                href: "/IMSystem/talkMsg/findByFromAndTo?from=" + from_id + "&to=" + to_id
             })
         }
     }
@@ -266,7 +266,7 @@
     function updateTalkerOnline(id) {
         $.ajax({
             type: "post",
-            url: "http://localhost:8080/imSystem/talker/findTalkersOfLogin",
+            url: "/IMSystem/talker/findTalkersOfLogin",
             data: {"id": id},
             dataType: "json",
             success: function (data) {
@@ -282,7 +282,7 @@
                         var username = data.talkers[i].username;
                         console.log("headImg:" + data.talkers[i].headImg);
                         var event = "ondblclick=\"createTalkTab(" + id + "," + data.talkers[i].id + ",'" + username + "')\"";
-                        var img = "<img src='http://localhost:8080/imSystem" + data.talkers[i].headImg + "' class='head_img'/>";
+                        var img = "<img src='/IMSystem" + data.talkers[i].headImg + "' class='head_img'/>";
                         var li = "<li " + event + ">" + img + username + "</li><br/>";
                         console.log(li);
                         $("#talkersOfOnline ul").append(li);
@@ -294,7 +294,7 @@
     /*创建会话*/
     function createWebSocket(talker) {
         /*请求WebSocket的地址*/
-        var url = "ws://localhost:8080/imSystem/easyui/talk?id=" + talker.id;
+        var url = "ws://" + window.location.host + "/IMSystem/easyui/talk?id=" + talker.id;
         /*开始建立连接*/
         var websocket = new WebSocket(url);
         console.log(talker.id);
@@ -423,7 +423,7 @@
                     //var password = $("#talker_pwd").val();
                     $.ajax({
                         type: "post",
-                        url: "http://localhost:8080/imSystem/talker/findByName",
+                        url: "/IMSystem/talker/findByName",
                         data: {"name": name},
                         dataType: "json",
                         success: function (data) {

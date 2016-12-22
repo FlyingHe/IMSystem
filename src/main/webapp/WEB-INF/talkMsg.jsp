@@ -4,7 +4,7 @@
   Date: 2016/9/18
   Time: 18:36
 --%>
-<%@ page language = "java" import = "java.util.*" pageEncoding = "UTF-8" %>
+<%@ page language = "java" pageEncoding = "UTF-8" %>
 <%@taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix = "f" uri = "http://java.sun.com/jsp/jstl/fmt" %>
 
@@ -15,7 +15,8 @@
     <title></title>
 </head>
 <body>
-    <center><h4 style = "padding: 0;margin: 0">您正在与 ${to.username} 通信</h4></center>
+    <center><h4 style = "padding: 0;margin: 0">您正在与 ${to.username} 通信</h4>
+    </center>
     <hr />
     <div class = "msg_container" style = "height: 350px;overflow: auto">
         <ul id = "talker${to.id}">
@@ -24,7 +25,7 @@
                     <c:when test = "${from.id ne talkMsg.from}">
                         <li class = "qipao">
                             <div class = "headimg fl">
-                                <img src = "http://localhost:8080/imSystem${from.headImg}" />
+                                <img src = "http://flyinghe.ngrok.cc/IMSystem${from.headImg}" />
                             </div>
                             <div class = "leftqipao">
                                 <div class = "left_sj"></div>
@@ -40,7 +41,7 @@
                     <c:otherwise>
                         <li class = "qipao">
                             <div class = "headimg fr">
-                                <img src = "http://localhost:8080/imSystem${from.headImg}" />
+                                <img src = "http://flyinghe.ngrok.cc/IMSystem${from.headImg}" />
                             </div>
                             <div class = "rightqipao">
                                 <div class = "right_sj"></div>
