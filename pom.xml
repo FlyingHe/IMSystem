@@ -2,7 +2,7 @@
          xsi:schemaLocation = "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>at.flying.im</groupId>
-    <artifactId>imSystem</artifactId>
+    <artifactId>IMSystem</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>imSystem Maven Webapp</name>
@@ -167,6 +167,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <finalName>imSystem</finalName>
+        <finalName>IMSystem</finalName>
     </build>
 </project>
