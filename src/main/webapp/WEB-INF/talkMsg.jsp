@@ -25,7 +25,7 @@
                     <c:when test = "${from.id ne talkMsg.from}">
                         <li class = "qipao">
                             <div class = "headimg fl">
-                                <img src = "http://flyinghe.ngrok.cc/IMSystem${from.headImg}" />
+                                <img src = "/IMSystem${from.headImg}" />
                             </div>
                             <div class = "leftqipao">
                                 <div class = "left_sj"></div>
@@ -41,7 +41,7 @@
                     <c:otherwise>
                         <li class = "qipao">
                             <div class = "headimg fr">
-                                <img src = "http://flyinghe.ngrok.cc/IMSystem${from.headImg}" />
+                                <img src = "/IMSystem${from.headImg}" />
                             </div>
                             <div class = "rightqipao">
                                 <div class = "right_sj"></div>
